@@ -3,9 +3,10 @@ class TrysteroSocket extends EventTarget {
         super();
         this.room = room;
         this.connectedTo = "";
-        this.connected = this.connectedTo ? true : false;
+        this.connected = false;
 
         const [sendTx, getRx] = this.room.makeAction('transport')
+        const [sendConnect, getConnected] = this.room.makeAction('connect')
         const [sendClose, getClose] = this.room.makeAction('close')
 
         this.sendTx = sendTx;
@@ -23,17 +24,27 @@ class TrysteroSocket extends EventTarget {
             }
         })
 
+        getConnected((data, peerId) => {
+            if(this.connectedTo == ""){
+                if(debug) console.log(`${peerId} connected`)
+                this.connected = true
+                this.connectedTo = peerId
+                this.onopen()
+                sendConnect("", peerId)
+            }
+        })
+
         this.room.onPeerJoin(peerId => {
             if(debug) console.log(`${peerId} joined`)
             if(this.connectedTo == ""){
-                this.connectedTo = peerId
-                this.onopen()
+                sendConnect("", peerId)
             }
         })
 
         this.room.onPeerLeave(peerId => {
             if(debug) console.log(`${peerId} left`)
             if(this.connectedTo == peerId){
+                this.connected = false
                 this.connectedTo = ""
                 this.onclose()
             }

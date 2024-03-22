@@ -9,7 +9,10 @@
 </head>
 <body>
     <script>
-        let socket = new TrysteroSocket(joinRoom({appId: "trysterosocket"}, "test"))
+        let socket = new TrysteroSocket(joinRoom({appId: "trysterosocket"}, "test"), true)
+        socket.addEventListener("open", (event) => {
+            console.log("Connected")
+        })
     </script>
 </body>
 </html>
